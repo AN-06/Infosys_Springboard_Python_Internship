@@ -1,0 +1,8 @@
+Date,Day,Day_Full,Month_Day,PM2.5_Predicted,AQI,Category,Color,Risk_Level
+2024-03-15,Fri,Friday,Mar 15,3.23,13.0,Good,#00E400,Low
+2024-03-16,Sat,Saturday,Mar 16,4.07,17.0,Good,#00E400,Low
+2024-03-17,Sun,Sunday,Mar 17,15.9,59.0,Moderate,#FFFF00,Low
+2024-03-18,Mon,Monday,Mar 18,4.87,20.0,Good,#00E400,Low
+2024-03-19,Tue,Tuesday,Mar 19,0.96,4.0,Good,#00E400,Low
+2024-03-20,Wed,Wednesday,Mar 20,5.3,22.0,Good,#00E400,Low
+2024-03-21,Thu,Thursday,Mar 21,-0.44,,Unknown,#808080,Low

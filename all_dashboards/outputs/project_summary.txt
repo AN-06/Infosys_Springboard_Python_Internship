@@ -1,0 +1,27 @@
+AIR QUALITY FORECASTING - PROJECT SUMMARY
+============================================================
+
+DATASET: 15984 records | Target: PM2.5
+SPLIT: 12787 train / 3197 test
+
+MODEL RANKING (by MAE):
+============================================================
+1. Prophet    MAE: 12.1763 | RMSE: 18.4909 | R²: -0.5515
+2. XGBoost    MAE: 13.5253 | RMSE: 18.1709 | R²: -0.4982
+3. ARIMA      MAE: 15.3369 | RMSE: 18.5601 | R²: -0.5631
+4. LSTM       MAE: 213.1568 | RMSE: 289.9247 | R²: -380.4129
+
+BEST MODEL: Prophet
+============================================================
+MAE:  12.1763
+RMSE: 18.4909
+R²:   -0.5515
+MAPE: inf%
+Improvement: -7.3%
+
+KEY INSIGHTS:
+- Prophet performs best with inf% average error
+- Model explains -55.1% of variance
+- Median prediction error: 9.41
+
+Generated: 2025-11-02 11:34:14

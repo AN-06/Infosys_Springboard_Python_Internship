@@ -1,0 +1,1046 @@
+/* ============================================================================
+   GLOBAL STYLES
+   ============================================================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+    background-color: #f5f7fa;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* ============================================================================
+   NAVIGATION BAR
+   ============================================================================ */
+
+.navbar {
+    background: #2c5f8d;
+    color: white;
+    padding: 1rem 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.navbar .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: white;
+}
+
+.nav-links {
+    display: flex;
+    gap: 0;
+}
+
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    padding: 0.6rem 1.5rem;
+    transition: background-color 0.3s ease;
+    font-size: 0.95rem;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* ============================================================================
+   DATA EXPLORER LAYOUT (Matching Image 2)
+   ============================================================================ */
+
+.explorer-container {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 0;
+    min-height: calc(100vh - 60px);
+}
+
+.explorer-sidebar {
+    background: #e8f5e9;
+    padding: 0;
+    border-right: 1px solid #c8e6c9;
+}
+
+.explorer-header {
+    background: #e8f5e9;
+    padding: 1.5rem 1.5rem 1rem 1.5rem;
+    border-bottom: 1px solid #c8e6c9;
+}
+
+.explorer-header h1 {
+    color: #2e7d32;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+}
+
+.subtitle {
+    color: #66bb6a;
+    font-size: 0.85rem;
+}
+
+.control-section {
+    padding: 1.5rem;
+}
+
+.control-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: #2e7d32;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+}
+
+.control-header .icon {
+    font-size: 1.1rem;
+}
+
+.control-item {
+    margin-bottom: 1.5rem;
+}
+
+.control-item label {
+    display: block;
+    color: #555;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.control-select {
+    width: 100%;
+    padding: 0.6rem;
+    border: 1px solid #c8e6c9;
+    border-radius: 4px;
+    background: white;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.control-select:focus {
+    outline: none;
+    border-color: #66bb6a;
+}
+
+/* Pollutant Pills */
+.pollutant-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.pill {
+    padding: 0.5rem 1rem;
+    border: 1px solid #c8e6c9;
+    border-radius: 20px;
+    background: white;
+    color: #555;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.pill:hover {
+    background: #f1f8f4;
+}
+
+.pill-active {
+    background: #4caf50 !important;
+    color: white !important;
+    border-color: #4caf50 !important;
+}
+
+/* Apply Button */
+.apply-btn {
+    width: 100%;
+    padding: 0.7rem;
+    background: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    transition: background 0.3s ease;
+}
+
+.apply-btn:hover {
+    background: #45a049;
+}
+
+.apply-btn .icon {
+    font-size: 1rem;
+}
+
+/* Data Quality Section */
+.quality-section {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #c8e6c9;
+}
+
+.quality-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: #2e7d32;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+}
+
+.quality-header .icon {
+    color: #4caf50;
+}
+
+.quality-item {
+    margin-bottom: 1rem;
+}
+
+.quality-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.4rem;
+    font-size: 0.85rem;
+    color: #555;
+}
+
+.quality-value {
+    font-weight: 600;
+    color: #2e7d32;
+}
+
+.quality-bar {
+    width: 100%;
+    height: 8px;
+    background: white;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid #c8e6c9;
+}
+
+.quality-fill {
+    height: 100%;
+    background: #4caf50;
+    transition: width 0.5s ease;
+}
+
+/* ============================================================================
+   DATA EXPLORER CONTENT AREA
+   ============================================================================ */
+
+.explorer-content {
+    background: #f5f7fa;
+    padding: 1.5rem;
+}
+
+.chart-row-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.chart-box {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.chart-box h3 {
+    color: #333;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+/* Force Data Explorer canvas size to reasonable fixed height */
+.chart-box canvas {
+    width: 100% !important;
+    height: 250px !important;
+    max-height: 360px;
+    display: block;
+}
+
+/* Statistics Grid */
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.stat-large {
+    text-align: center;
+    padding: 1rem;
+}
+
+.stat-large .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #4caf50;
+    margin-bottom: 0.3rem;
+}
+
+.stat-large .stat-label {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+/* ============================================================================
+   FORECAST ENGINE LAYOUT (Matching Image 1)
+   ============================================================================ */
+
+.forecast-container {
+    background: #f5f7fa;
+    /* remove forcing huge min-height, let content size naturally */
+    min-height: auto;
+    padding: 0;
+}
+
+.forecast-header {
+    background: #e3f2fd;
+    padding: 1.5rem;
+    border-bottom: 2px solid #90caf9;
+}
+
+.forecast-header h1 {
+    color: #1565c0;
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+}
+
+.forecast-header .subtitle {
+    color: #42a5f5;
+    font-size: 0.9rem;
+}
+
+.forecast-content {
+    padding: 1.5rem;
+}
+
+/* Forecast Chart Boxes */
+.forecast-chart-box {
+    background: white;
+    padding: 1.2rem; /* slightly reduced padding for more room to charts */
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+
+/* Make forecast canvases match Data Explorer dimensions and constrain them,
+   overriding any inline HTML height attributes */
+.forecast-chart-box canvas,
+#forecastChart,
+#modelPerformanceChart,
+#accuracyChart {
+    width: 100% !important;
+    height: 260px !important;
+    max-height: 360px;
+    display: block;
+}
+
+/* Reduce large strokes/point radii for forecast charts visually */
+.forecast-chart-box .chart-compact {
+    max-height: 360px;
+}
+
+/* Forecast chart header */
+.forecast-chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.forecast-chart-header h3 {
+    color: #333;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Metric Toggle Buttons */
+.metric-toggle {
+    display: flex;
+    gap: 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.metric-btn {
+    padding: 0.5rem 1.2rem;
+    background: white;
+    border: none;
+    color: #666;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.metric-btn.active {
+    background: #2196f3;
+    color: white;
+}
+
+.metric-btn:hover:not(.active) {
+    background: #f5f5f5;
+}
+
+/* Forecast Controls */
+.forecast-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.forecast-control-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.forecast-control-group label {
+    font-size: 0.9rem;
+    color: #555;
+    font-weight: 500;
+}
+
+.forecast-select {
+    padding: 0.45rem 0.9rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    background: white;
+}
+
+.forecast-select:focus {
+    outline: none;
+    border-color: #2196f3;
+}
+
+.generate-btn {
+    padding: 0.45rem 1.2rem;
+    background: #2196f3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.generate-btn:hover {
+    background: #1976d2;
+}
+
+/* Two Column Grid */
+.forecast-two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Best Models Table */
+.best-models-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.best-models-table thead {
+    background: #f5f5f5;
+}
+
+.best-models-table th {
+    padding: 0.6rem;
+    text-align: left;
+    font-weight: 600;
+    color: #555;
+    font-size: 0.9rem;
+    border-bottom: 2px solid #ddd;
+}
+
+.best-models-table td {
+    padding: 0.6rem;
+    border-bottom: 1px solid #eee;
+    font-size: 0.9rem;
+}
+
+.best-models-table tbody tr:hover {
+    background: #f9f9f9;
+}
+
+.status-active {
+    color: #4caf50;
+}
+
+/* MAE Display */
+.mae-display {
+    margin-top: 1rem;
+    padding: 0.6rem;
+    background: #e3f2fd;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 1rem;
+}
+
+.mae-display strong {
+    color: #1565c0;
+}
+
+.mae-value {
+    font-weight: 700;
+    color: #1976d2;
+}
+
+/* ============================================================================
+   HOME PAGE STYLES
+   ============================================================================ */
+
+.hero {
+    background: linear-gradient(135deg, #2196f3 0%, #1565c0 100%);
+    color: white;
+    padding: 3rem 0;
+    text-align: center;
+}
+
+.hero-title {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+
+.hero-subtitle {
+    font-size: 1.2rem;
+    opacity: 0.95;
+}
+
+.main-content {
+    padding: 3rem 0;
+}
+
+/* .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+} */
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 2rem;
+    margin-bottom: 3rem;
+    align-items: stretch;
+    justify-items: stretch;
+}
+
+
+.card {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.card h2 {
+    color: #1565c0;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.card p {
+    color: #666;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+.card ul {
+    list-style: none;
+    margin-bottom: 1.5rem;
+}
+
+.card ul li {
+    padding: 0.4rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+    color: #555;
+}
+
+.card ul li:before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #4caf50;
+    font-weight: bold;
+}
+
+.btn {
+    display: inline-block;
+    padding: 0.7rem 1.5rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+.btn-primary {
+    background: #2196f3;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #1976d2;
+    transform: translateY(-2px);
+}
+
+/* How to Use Section */
+.how-to-use {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 3rem;
+}
+.how-to-use h2 {
+    color: #1565c0;
+    margin-bottom: 2rem;
+    text-align: center;
+    font-size: 1.8rem;
+}
+.steps {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1.5rem;
+}
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+}
+.step-number {
+    background: #2196f3;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+.step-content h3 {
+    color: #1565c0;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+}
+.step-content p {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* Statistics Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+}
+
+.stat-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #2196f3;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 1rem;
+}
+
+/* ============================================================================
+   FOOTER
+   ============================================================================ */
+
+footer {
+    background: #2c5f8d;
+    color: white;
+    text-align: center;
+    padding: 1.5rem 0;
+    margin-top: 3rem;
+}
+
+footer p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+/* ============================================================================
+   LOADING STATES
+   ============================================================================ */
+
+.loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.spinner {
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #2196f3;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================ */
+
+@media (max-width: 1024px) {
+    .explorer-container {
+        grid-template-columns: 260px 1fr;
+    }
+
+    .chart-row-2col,
+    .forecast-two-col {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .explorer-container {
+        grid-template-columns: 1fr;
+    }
+
+    .explorer-sidebar {
+        position: relative;
+    }
+
+    .nav-links {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .forecast-chart-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .stats-container {
+        grid-template-columns: 1fr;
+    }
+
+    /* On small screens further reduce forecast canvas height */
+    .forecast-chart-box canvas,
+    .chart-box canvas {
+        height: 220px !important;
+        max-height: 300px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-title {
+        font-size: 1.8rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+
+    .card {
+        padding: 1.5rem;
+    }
+}
+/* -------------------------------
+   AQI DASHBOARD LAYOUT & STYLES (CORRECTED)
+--------------------------------*/
+
+/* ---------- Dashboard grid & card sizing ---------- */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+/* On larger screens, adjust proportions */
+@media (min-width: 1000px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr 1.3fr;
+    }
+}
+
+/* Card styling */
+.card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+}
+
+/* Canvas sizing for charts */
+#aqiDonut {
+    width: 100% !important;
+    height: 280px !important;
+    max-height: 400px;
+    display: block;
+    margin: 0 auto;
+}
+
+#pollutantChart {
+    width: 100% !important;
+    height: 280px !important;
+    max-height: 350px;
+}
+
+/* ---------- Forecast Pills ---------- */
+#forecastContainer {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.forecast-pill {
+    padding: 12px 8px;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s;
+}
+
+.forecast-pill:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+.forecast-pill b {
+    display: block;
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+}
+
+.forecast-pill small {
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+/* AQI Category Colors for Forecast Pills */
+.forecast-pill.good {
+    background: linear-gradient(135deg, #00e400 0%, #2ca76c 100%);
+    color: white;
+}
+
+.forecast-pill.moderate {
+    background: linear-gradient(135deg, #ffff00 0%, #ffcc00 100%);
+    color: #333;
+}
+
+.forecast-pill.unhealthy-sensitive {
+    background: linear-gradient(135deg, #ff7e00 0%, #ff9933 100%);
+    color: white;
+}
+
+.forecast-pill.unhealthy {
+    background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+    color: white;
+}
+
+.forecast-pill.very-unhealthy {
+    background: linear-gradient(135deg, #8f3f97 0%, #9c27b0 100%);
+    color: white;
+}
+
+.forecast-pill.hazardous {
+    background: linear-gradient(135deg, #7e0023 0%, #5e001a 100%);
+    color: white;
+}
+
+.forecast-pill.no-data {
+    background: #f5f5f5;
+    color: #999;
+    border: 1px dashed #ddd;
+}
+
+/* ---------- Active Alerts Styling ---------- */
+#alertsList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#alertsList li {
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    border-left: 4px solid;
+}
+
+/* No alerts (good air quality) */
+#alertsList li.no-alerts {
+    background: #e8f5e9;
+    border-left-color: #4caf50;
+    color: #2e7d32;
+    font-weight: 500;
+}
+
+/* Moderate alert */
+.alert-moderate {
+    background: #fff9e6;
+    border-left-color: #ffa726;
+    color: #e65100;
+}
+
+/* Unhealthy for Sensitive Groups */
+.alert-unhealthy-sensitive {
+    background: #fff3e0;
+    border-left-color: #ff9800;
+    color: #e65100;
+}
+
+/* Unhealthy / High Pollution */
+.alert-unhealthy,
+.alert-high-pollution {
+    background: #ffebee;
+    border-left-color: #f44336;
+    color: #c62828;
+}
+
+/* Very Unhealthy / Hazardous */
+.alert-very-unhealthy,
+.alert-hazard {
+    background: #f3e5f5;
+    border-left-color: #9c27b0;
+    color: #6a1b9a;
+}
+
+/* ---------- Header Controls ---------- */
+.control-select {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.3s;
+}
+
+.control-select:hover,
+.control-select:focus {
+    border-color: #1565c0;
+    outline: none;
+}
+
+/* ---------- Responsive Design ---------- */
+@media (max-width: 768px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    #aqiDonut {
+        height: 220px !important;
+    }
+    
+    #pollutantChart {
+        height: 200px !important;
+    }
+    
+    .forecast-pill {
+        padding: 10px 6px;
+        font-size: 0.8rem;
+    }
+    
+    #forecastContainer {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+}
+
+/* Subtitle styling */
+.subtitle {
+    color: #66bb6a;
+    font-weight: 500;
+    margin-top: 0.25rem;
+}

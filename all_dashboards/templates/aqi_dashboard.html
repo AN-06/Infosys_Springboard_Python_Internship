@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AQI Dashboard - Air Quality System</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="container">
+      <div class="logo">🌍 Air Quality System</div>
+      <div class="nav-links">
+        <a href="{{ url_for('index') }}">Home</a>
+        <a href="{{ url_for('data_explorer') }}">Data Explorer</a>
+        <a href="{{ url_for('forecast_engine') }}">Forecast Engine</a>
+        <a href="{{ url_for('aqi_dashboard') }}" class="active">AQI Dashboard</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container" style="padding: 2rem 0">
+    <!-- Header -->
+    <header style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;">
+      <div>
+        <h1 style="color:#d84315;margin:0;">Air Quality Alert System</h1>
+        <p class="subtitle" style="margin:0.25rem 0 0 0;">Milestone 3: Working Application (Weeks 5–6)</p>
+      </div>
+      <div style="text-align:right;">
+        <label for="stationSelect" style="font-weight:600;color:#555;display:block;margin-bottom:6px;">Station / Location</label>
+        <select id="stationSelect" class="control-select" style="min-width:200px;">
+          <option value="">Loading...</option>
+        </select>
+        <p style="font-size:0.85rem;color:#777;margin-top:0.5rem;">Updated: <span id="updatedTime">—</span></p>
+      </div>
+    </header>
+
+    <!-- Dashboard Cards Grid -->
+    <div class="dashboard-grid">
+      <!-- Card 1: Current Air Quality -->
+      <div class="card">
+        <h3 style="color:#d84315;">Current Air Quality</h3>
+        <canvas id="aqiDonut"></canvas>
+        <p id="aqiValue" style="text-align:center;font-size:2.5rem;margin:1rem 0 0.25rem 0;font-weight:bold;color:#1565c0;">—</p>
+        <p id="aqiCategory" style="text-align:center;color:#555;font-size:1.1rem;font-weight:500;margin:0;">AQI</p>
+        <p style="text-align:center;color:#999;font-size:0.85rem;margin-top:0.5rem;">Downtown Station</p>
+      </div>
+
+      <!-- Card 2: Pollutant Concentrations -->
+      <div class="card">
+        <h3 style="color:#d84315;">Pollutant Concentrations</h3>
+        <p style="font-size:0.85rem;color:#888;margin-bottom:0.75rem;">PM2.5, PM10, O₃ with WHO limit (dashed)</p>
+        <canvas id="pollutantChart"></canvas>
+      </div>
+
+      <!-- Card 3: 7-Day Forecast -->
+      <div class="card">
+        <h3 style="color:#d84315;">7-Day Forecast</h3>
+        <div id="forecastContainer"></div>
+      </div>
+
+      <!-- Card 4: Active Alerts -->
+      <div class="card">
+        <h3 style="color:#d84315;">Active Alerts</h3>
+        <ul id="alertsList"></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer
+  <footer style="background:#f5f5f5;padding:1.5rem 0;margin-top:3rem;text-align:center;">
+    <div class="container">
+      <p style="margin:0;color:#666;">Built with Flask & Chart.js | Air Quality Monitoring System</p>
+    </div>
+  </footer> -->
+
+<script>
+/*
+ * AQI Dashboard Frontend Script (CORRECTED)
+ */
+
+const WHO_LIMITS = { PM25: 25, PM10: 50, O3: 100 };
+let aqiChart = null;
+let pollutantChart = null;
+
+// --- AQI Helper Functions ---
+function getAqiCategory(aqi) {
+    if (aqi === null || aqi === undefined || isNaN(aqi) || aqi < 0) return '';
+    if (aqi <= 50) return 'Good';
+    if (aqi <= 100) return 'Moderate';
+    if (aqi <= 150) return 'Unhealthy for Sensitive Groups';
+    if (aqi <= 200) return 'Unhealthy';
+    if (aqi <= 300) return 'Very Unhealthy';
+    return 'Hazardous';
+}
+
+function getAqiClass(aqi) {
+    const category = getAqiCategory(aqi);
+    return category.toLowerCase().replace(/\s+/g, '-').replace('unhealthy-for-sensitive-groups', 'unhealthy-sensitive');
+}
+
+function getAqiColor(aqi) {
+    if (aqi === null || aqi === undefined || isNaN(aqi) || aqi < 0) return '#cccccc';
+    if (aqi <= 50) return '#00e400';
+    if (aqi <= 100) return '#ffff00';
+    if (aqi <= 150) return '#ff7e00';
+    if (aqi <= 200) return '#ff0000';
+    if (aqi <= 300) return '#8f3f97';
+    return '#7e0023';
+}
+
+// --- Chart Rendering Functions ---
+function renderAQI(aqi, category) {
+    const ctx = document.getElementById("aqiDonut").getContext("2d");
+    if (aqiChart) aqiChart.destroy();
+    
+    const value = (aqi === null || aqi === undefined || isNaN(aqi)) ? 0 : aqi;
+    const aqiColor = getAqiColor(value);
+    const remainder = Math.max(0, 500 - value);
+
+    aqiChart = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+            labels: ["AQI", "Remaining"],
+            datasets: [{
+                data: [value, remainder],
+                backgroundColor: [aqiColor, "#eeeeee"],
+                borderWidth: 0,
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            cutout: "75%",
+            plugins: { 
+                legend: { display: false },
+                tooltip: { enabled: false }
+            },
+            maintainAspectRatio: true,
+            responsive: true
+        }
+    });
+
+    document.getElementById("aqiValue").textContent = (aqi === null || aqi === undefined || isNaN(aqi)) ? "—" : aqi;
+    document.getElementById("aqiCategory").textContent = category || "No Data";
+}
+
+function renderPollutants(obj) {
+    const ctx = document.getElementById("pollutantChart").getContext("2d");
+    if (pollutantChart) pollutantChart.destroy();
+    
+    const labels = obj.labels || [];
+    const pm25Data = obj.pm25 || [];
+    const pm10Data = obj.pm10 || [];
+    const o3Data = obj.o3 || [];
+    
+    // Calculate max Y value
+    const allValues = [].concat(pm25Data, pm10Data, o3Data);
+    const maxVal = Math.max(...allValues, WHO_LIMITS.PM10, 60) * 1.15;
+    
+    pollutantChart = new Chart(ctx, {
+        type: "line",
+        data: {
+            labels,
+            datasets: [
+                { 
+                    label: "PM2.5", 
+                    data: pm25Data, 
+                    borderColor: "#42a5f5", 
+                    backgroundColor: "rgba(66, 165, 245, 0.1)",
+                    fill: false, 
+                    tension: 0.3,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                },
+                { 
+                    label: "PM10", 
+                    data: pm10Data, 
+                    borderColor: "#26a69a", 
+                    backgroundColor: "rgba(38, 166, 154, 0.1)",
+                    fill: false, 
+                    tension: 0.3,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                },
+                { 
+                    label: "O₃", 
+                    data: o3Data, 
+                    borderColor: "#ff9800", 
+                    backgroundColor: "rgba(255, 152, 0, 0.1)",
+                    fill: false, 
+                    tension: 0.3,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                },
+                { 
+                    label: "WHO PM2.5 Limit", 
+                    data: new Array(labels.length).fill(WHO_LIMITS.PM25), 
+                    borderDash: [8, 4], 
+                    borderColor: "#999", 
+                    borderWidth: 2, 
+                    fill: false, 
+                    pointRadius: 0,
+                    tension: 0
+                },
+                { 
+                    label: "WHO Limit", 
+                    data: new Array(labels.length).fill(WHO_LIMITS.PM10), 
+                    borderDash: [8, 4], 
+                    borderColor: "#d32f2f", 
+                    borderWidth: 2, 
+                    fill: false, 
+                    pointRadius: 0,
+                    tension: 0
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            scales: { 
+                y: { 
+                    beginAtZero: true,
+                    max: maxVal,
+                    ticks: { color: '#666' },
+                    grid: { color: '#f0f0f0' }
+                },
+                x: {
+                    ticks: { color: '#666' },
+                    grid: { display: false }
+                }
+            },
+            plugins: { 
+                legend: { 
+                    position: "bottom",
+                    labels: { 
+                        padding: 10,
+                        font: { size: 11 },
+                        usePointStyle: true
+                    }
+                }
+            }
+        }
+    });
+}
+
+function renderForecast(aqiList) {
+    const container = document.getElementById("forecastContainer");
+    container.innerHTML = "";
+    
+    const today = new Date().getDay();
+    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+    aqiList = aqiList || [];
+    
+    for (let i = 0; i < 7; i++) {
+        const val = (i < aqiList.length && aqiList[i] !== undefined && aqiList[i] !== null) ? aqiList[i] : null;
+        const day = dayNames[(today + i) % 7];
+        const div = document.createElement("div");
+
+        const aqiClass = (val !== null && val > 0) ? getAqiClass(val) : 'no-data';
+        const category = (val !== null && val > 0) ? getAqiCategory(val) : 'No Data';
+        
+        div.className = `forecast-pill ${aqiClass}`;
+        div.innerHTML = `<b>${day}</b><small>AQI ${val !== null ? val : '—'}</small><br><small style="font-size:0.7rem;opacity:0.9;">${category}</small>`;
+        
+        container.appendChild(div);
+    }
+}
+
+function renderAlerts(alerts) {
+    const list = document.getElementById("alertsList");
+    list.innerHTML = "";
+    
+    if (!alerts || alerts.length === 0) {
+        const li = document.createElement("li");
+        li.textContent = "✓ No active alerts";
+        li.className = "no-alerts";
+        list.appendChild(li);
+        return;
+    }
+    
+    alerts.forEach(alertText => {
+        const li = document.createElement("li");
+        const lowerAlert = alertText.toLowerCase();
+        
+        // Determine icon and alert class based on content
+        let icon = '⚠️';
+        let alertClass = 'alert-moderate';
+        
+        if (lowerAlert.includes('good') || lowerAlert.includes('no health concerns') || lowerAlert.includes('no active alerts')) {
+            icon = '✅';
+            alertClass = 'no-alerts';
+        } else if (lowerAlert.includes('health alert') || lowerAlert.includes('everyone should avoid') || lowerAlert.includes('hazardous')) {
+            icon = '🚨';
+            alertClass = 'alert-high-pollution';
+        } else if (lowerAlert.includes('unhealthy for sensitive') || lowerAlert.includes('sensitive groups')) {
+            icon = '⚠️';
+            alertClass = 'alert-unhealthy-sensitive';
+        } else if (lowerAlert.includes('moderate')) {
+            icon = '⚠️';
+            alertClass = 'alert-moderate';
+        } else if (lowerAlert.includes('high ozone') || lowerAlert.includes('high pollution')) {
+            icon = '🔴';
+            alertClass = 'alert-high-pollution';
+        }
+        
+        // Split alert text into title and time (if newline exists)
+        const parts = alertText.split('\n');
+        const title = parts[0];
+        const time = parts.length > 1 ? parts[1] : '';
+        
+        li.className = alertClass;
+        
+        if (time) {
+            li.innerHTML = `
+                <div style="display: flex; align-items: start; gap: 8px;">
+                    <span style="font-size: 1.2rem;">${icon}</span>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; margin-bottom: 2px;">${title}</div>
+                        <div style="font-size: 0.85rem; opacity: 0.9;">${time}</div>
+                    </div>
+                </div>
+            `;
+        } else {
+            li.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 1.2rem;">${icon}</span>
+                    <span style="font-weight: 600;">${title}</span>
+                </div>
+            `;
+        }
+        
+        list.appendChild(li);
+    });
+}
+
+// --- API Functions ---
+async function loadStations() {
+    try {
+        const resp = await fetch('/api/locations');
+        if (!resp.ok) throw new Error('Failed to load locations');
+        
+        const data = await resp.json();
+        console.log('Locations loaded:', data);
+        
+        const select = document.getElementById('stationSelect');
+        select.innerHTML = '';
+        
+        const locations = data.locations || [];
+        
+        if (locations.length === 0) {
+            select.innerHTML = '<option value="">Default Location</option>';
+            await updateDashboardFromAPI('');
+            return;
+        }
+        
+        locations.forEach(loc => {
+            const opt = document.createElement('option');
+            opt.value = loc;
+            opt.textContent = loc;
+            select.appendChild(opt);
+        });
+        
+        // Restore previous selection or use first
+        const saved = sessionStorage.getItem('aqi_station');
+        if (saved && locations.includes(saved)) {
+            select.value = saved;
+        } else {
+            select.value = locations[0];
+        }
+        
+        await updateDashboardFromAPI(select.value);
+        
+    } catch (e) {
+        console.error('Error loading stations:', e);
+        document.getElementById('stationSelect').innerHTML = '<option>Error loading locations</option>';
+        // Try to load with default anyway
+        await updateDashboardFromAPI('');
+    }
+}
+
+async function updateDashboardFromAPI(station) {
+    try {
+        station = station || '';
+        sessionStorage.setItem('aqi_station', station);
+        document.getElementById('updatedTime').innerText = 'Loading...';
+        
+        const url = `/api/station-summary?station=${encodeURIComponent(station)}`;
+        const resp = await fetch(url);
+        
+        if (!resp.ok) throw new Error('API request failed');
+        
+        const data = await resp.json();
+        console.log('Dashboard data:', data);
+
+        if (data.error) {
+            throw new Error(data.error);
+        }
+
+        // Render all components
+        const currentAqi = data.current_aqi;
+        const category = data.aqi_category || getAqiCategory(currentAqi);
+        
+        renderAQI(currentAqi, category);
+        
+        const labels = data.times || [];
+        renderPollutants({ 
+            labels, 
+            pm25: data.pm25 || [], 
+            pm10: data.pm10 || [], 
+            o3: data.o3 || [] 
+        });
+        
+        renderForecast(data.forecast_7 || []);
+        
+        const alerts = (data.alerts || []).map(a => 
+            typeof a === 'string' ? a : (a.title || JSON.stringify(a))
+        );
+        renderAlerts(alerts);
+        
+        document.getElementById('updatedTime').innerText = new Date().toLocaleTimeString();
+        
+    } catch (e) {
+        console.error('Error updating dashboard:', e);
+        document.getElementById('updatedTime').innerText = 'Error';
+        
+        // Show error state
+        renderAQI(null, 'Error Loading Data');
+        renderPollutants({ labels: [], pm25: [], pm10: [], o3: [] });
+        renderForecast([]);
+        renderAlerts(['Unable to load data. Please check your data files.']);
+    }
+}
+
+// --- Initialize on page load ---
+document.addEventListener('DOMContentLoaded', () => {
+    const select = document.getElementById('stationSelect');
+    if (select) {
+        select.addEventListener('change', () => updateDashboardFromAPI(select.value));
+    }
+    
+    // Load initial data
+    loadStations().catch(console.error);
+});
+</script>
+
+</body>
+</html>

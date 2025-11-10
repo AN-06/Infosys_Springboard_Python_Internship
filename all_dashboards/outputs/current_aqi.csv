@@ -1,0 +1,2 @@
+timestamp,location,PM2.5,PM2.5_AQI,PM2.5_Category,PM10,PM10_AQI,PM10_Category,O3,O3_AQI,O3_Category,Overall_AQI,Overall_Category,Color
+2024-03-14 13:00:00,US Diplomatic Post: Dubai,-91.484,,Unknown,6.13,6,Good,-0.999,,Unknown,6,Good,#00E400

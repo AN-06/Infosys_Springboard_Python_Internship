@@ -1,0 +1,8 @@
+Date,Day,AQI,Category,Alert_Level,Title,Message,Icon
+2024-03-15,Friday,13.0,Good,info,Good Air Quality,"Air quality is satisfactory, and air pollution poses little or no risk.",✅
+2024-03-16,Saturday,17.0,Good,info,Good Air Quality,"Air quality is satisfactory, and air pollution poses little or no risk.",✅
+2024-03-17,Sunday,59.0,Moderate,warning,Moderate Air Quality,"Air quality is acceptable. However, there may be a risk for some people who are unusually sensitive to air pollution.",⚠️
+2024-03-18,Monday,20.0,Good,info,Good Air Quality,"Air quality is satisfactory, and air pollution poses little or no risk.",✅
+2024-03-19,Tuesday,4.0,Good,info,Good Air Quality,"Air quality is satisfactory, and air pollution poses little or no risk.",✅
+2024-03-20,Wednesday,22.0,Good,info,Good Air Quality,"Air quality is satisfactory, and air pollution poses little or no risk.",✅
+2024-03-21,Thursday,,Unknown,info,Good Air Quality,"Air quality is satisfactory, and air pollution poses little or no risk.",✅

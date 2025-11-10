@@ -1,0 +1,14 @@
+Pollutant,Current_Value,Previous_Day,Change_Day_Percent,Previous_Week,Change_Week_Percent,Previous_Month,Change_Month_Percent,Avg_30d,Max_30d,Min_30d,Trend,Trend_Icon,Trend_Color
+BC,3.4,3.4,0.0,3.4,0.0,3.4,0.0,3.4,3.4,3.4,Stable,→,orange
+CO,122.35,122.35,0.0,0.12,101860.0,0.5,24370.4,69.41,122.35,0.12,Increasing,↑,red
+NO,4.44,4.44,0.0,12.97,-65.77,0.0,1479900.0,4.08,12.97,0.0,Decreasing,↓,green
+NO2,6.8,6.8,0.0,26.66,-74.49,0.01,49900.0,16.72,35.77,0.0,Decreasing,↓,green
+NOX,40.22,40.22,0.0,39.62,1.51,13.0,209.38,22.77,40.22,11.17,Stable,→,orange
+O3,-1.0,-1.0,-0.0,4.49,-122.25,0.02,-4096.0,13.63,69.0,-1.0,Decreasing,↓,green
+PM1,11.0,11.0,0.0,11.0,0.0,11.0,0.0,11.0,11.0,11.0,Stable,→,orange
+PM10,6.13,6.13,0.0,24.5,-74.98,12.98,-52.76,22.4,50.25,5.26,Decreasing,↓,green
+PM2.5,-91.48,-91.48,-0.0,33.6,-372.27,8.9,-1127.91,7.87,33.6,-91.48,Decreasing,↓,green
+RELATIVEHUMIDITY,35.55,35.55,0.0,35.55,0.0,35.55,0.0,35.55,35.55,35.55,Stable,→,orange
+SO2,6.02,6.02,0.0,8.13,-25.95,0.0,1504900.0,18.51,122.35,-0.47,Decreasing,↓,green
+TEMPERATURE,19.09,19.09,0.0,19.09,0.0,19.09,0.0,19.09,19.09,19.09,Stable,→,orange
+UM003,122.35,122.35,0.0,122.35,0.0,122.35,0.0,122.35,122.35,122.35,Stable,→,orange

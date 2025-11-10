@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Air Quality Monitoring System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Navigation Bar -->
+<nav class="navbar">
+    <div class="container">
+        <div class="logo">🌍 Air Quality System</div>
+        <div class="nav-links">
+            <a href="/" class="active">Home</a>
+            <a href="/data-explorer">Data Explorer</a>
+            <a href="/forecast-engine">Forecast Engine</a>
+            <a href="{{ url_for('aqi_dashboard') }}">AQI Dashboard</a>
+        </div>
+    </div>
+</nav>
+
+
+    <!-- Hero Section -->
+    <div class="hero">
+        <div class="container">
+            <h1 class="hero-title">🌍 Air Quality Monitoring System</h1>
+            <p class="hero-subtitle">Real-time Air Quality Data Analysis & Forecasting</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container main-content">
+        <!-- Feature Cards -->
+        <div class="cards-grid">
+            <div class="card">
+                <div class="card-icon">📊</div>
+                <h2>Data Explorer</h2>
+                <p>Explore historical air quality data with interactive visualizations and filters.</p>
+                <ul>
+                    <li>Filter by location & time</li>
+                    <li>View time series trends</li>
+                    <li>Analyze correlations</li>
+                    <li>Statistical summaries</li>
+                </ul>
+                <a href="/data-explorer" class="btn btn-primary">Explore Data</a>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">🔮</div>
+                <h2>Forecast Engine</h2>
+                <p>Advanced ML models for air quality prediction and forecasting.</p>
+                <ul>
+                    <li>ARIMA, Prophet, LSTM, XGBoost</li>
+                    <li>Compare model performance</li>
+                    <li>Interactive forecasts</li>
+                    <li>Confidence intervals</li>
+                </ul>
+                <a href="/forecast-engine" class="btn btn-primary">View Forecasts</a>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">📈</div>
+                <h2>AQI Dashboard</h2>
+                <p>Real-time air quality monitoring with visual alerts and health advisories.</p>
+                <ul>
+                    <li>Live AQI calculations & categories</li>
+                    <li>PM2.5, PM10, O₃ concentration tracking</li>
+                    <li>7-day air quality forecasts</li>
+                    <li>Health alerts & insights</li>
+                </ul>
+                <a href="{{ url_for('aqi_dashboard') }}" class="btn btn-primary">Check Air Quality</a>
+            </div>
+             <div class="card">
+        <div class="card-icon">📉</div>
+        <h2>Streamlit Dashboard</h2>
+        <p>Interactive advanced analytics with real-time visualizations and controls.</p>
+        <ul>
+            <li>Real-time AQI gauge & monitoring</li>
+            <li>Multi-model forecast comparison</li>
+            <li>Weekly pollutant trend analysis</li>
+            <li>Admin mode & alert system</li>
+        </ul>
+        <a href="/streamlit" class="btn btn-primary">Open Streamlit Dashboard</a>
+
+        </div>
+    </div>
+        
+
+        <!-- How to Use Section -->
+        <div class="how-to-use">
+            <h2>🚀 How to Use</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Navigate</h3>
+                        <p>Use the navigation bar to switch between dashboards</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Data Explorer</h3>
+                        <p>Filter and visualize historical air quality data</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Forecast Engine</h3>
+                        <p>View model predictions and performance metrics</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>AQI Dashboard</h3>
+                        <p>Monitor real-time air quality with alerts and forecasts</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <h3>Interact</h3>
+                        <p>All charts are interactive - hover, zoom, and explore!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">1M+</div>
+                <div class="stat-label">Total Records</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">500+</div>
+                <div class="stat-label">Locations</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">6</div>
+                <div class="stat-label">Pollutants</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">4</div>
+                <div class="stat-label">ML Models</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>Built with Flask & Chart.js </p>
+        </div>
+    </footer>
+</body>
+</html>

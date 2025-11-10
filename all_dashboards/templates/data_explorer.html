@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Air Quality Data Explorer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">🌍 Air Quality System</div>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/data-explorer" class="active">Data Explorer</a>
+                <a href="/forecast-engine">Forecast Engine</a>
+                <a href="{{ url_for('aqi_dashboard') }}">AQI Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Dashboard Container -->
+    <div class="explorer-container">
+        <!-- Left Sidebar - Controls -->
+        <div class="explorer-sidebar">
+            <div class="explorer-header">
+                <h1>Air Quality Data Explorer</h1>
+                <p class="subtitle">Milestone 1: Working Application (Weeks 1-2)</p>
+            </div>
+
+            <div class="control-section">
+                <div class="control-header">
+                    <span class="icon">☰</span> Data Controls
+                </div>
+
+                <!-- Location Filter -->
+                <div class="control-item">
+                    <label>Location</label>
+                    <select id="locationSelect" class="control-select">
+                        <option>Loading...</option>
+                    </select>
+                </div>
+
+                <!-- Time Range Filter -->
+                <div class="control-item">
+                    <label>Time Range</label>
+                    <select id="timeRangeSelect" class="control-select">
+                        <option value="Last 24 Hours" selected>Last 24 Hours</option>
+                        <option value="Last 7 Days">Last 7 Days</option>
+                        <option value="Last 30 Days">Last 30 Days</option>
+                    </select>
+                </div>
+
+                <!-- Pollutants Filter -->
+                <div class="control-item">
+                    <label>Pollutants</label>
+                    <div class="pollutant-pills" id="pollutantPills">
+                        <button class="pill pill-active" data-pollutant="PM2.5">PM2.5</button>
+                        <button class="pill" data-pollutant="PM10">PM10</button>
+                        <button class="pill" data-pollutant="NO2">NO2</button>
+                        <button class="pill" data-pollutant="O3">O3</button>
+                        <button class="pill" data-pollutant="SO2">SO2</button>
+                        <button class="pill" data-pollutant="CO">CO</button>
+                    </div>
+                </div>
+
+                <!-- Apply Filters Button -->
+                <button id="applyFiltersBtn" class="apply-btn">
+                    <span class="icon">🔄</span> Apply Filters
+                </button>
+
+                <!-- Data Quality Section -->
+                <div class="quality-section">
+                    <div class="quality-header">
+                        <span class="icon">●</span> Data Quality
+                    </div>
+                    <div class="quality-item">
+                        <div class="quality-label">
+                            <span>Completeness:</span>
+                            <span id="completenessText" class="quality-value">--</span>
+                        </div>
+                        <div class="quality-bar">
+                            <div id="completenessBar" class="quality-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="quality-item">
+                        <div class="quality-label">
+                            <span>Validity:</span>
+                            <span id="validityText" class="quality-value">--</span>
+                        </div>
+                        <div class="quality-bar">
+                            <div id="validityBar" class="quality-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Content Area - Charts -->
+        <div class="explorer-content">
+            <!-- Row 1: Time Series and Correlations -->
+            <div class="chart-row-2col">
+                <div class="chart-box">
+                    <h3>PM2.5 Time Series</h3>
+                    <canvas id="timeSeriesChart"></canvas>
+                </div>
+                <div class="chart-box">
+                    <h3>Pollutant Correlations</h3>
+                    <canvas id="correlationChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Row 2: Statistics and Distribution -->
+            <div class="chart-row-2col">
+                <div class="chart-box">
+                    <h3>Statistical Summary</h3>
+                    <div class="stats-container">
+                        <div class="stat-large">
+                            <div class="stat-value" id="statMean">--</div>
+                            <div class="stat-label">Mean (μg/m³)</div>
+                        </div>
+                        <div class="stat-large">
+                            <div class="stat-value" id="statMedian">--</div>
+                            <div class="stat-label">Median (μg/m³)</div>
+                        </div>
+                        <div class="stat-large">
+                            <div class="stat-value" id="statStd">--</div>
+                            <div class="stat-label">Std Dev</div>
+                        </div>
+                        <div class="stat-large">
+                            <div class="stat-value" id="statMin">--</div>
+                            <div class="stat-label">Min (μg/m³)</div>
+                        </div>
+                        <div class="stat-large">
+                            <div class="stat-value" id="statMax">--</div>
+                            <div class="stat-label">Max (μg/m³)</div>
+                        </div>
+                        <div class="stat-large">
+                            <div class="stat-value" id="statCount">--</div>
+                            <div class="stat-label">Data Points</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-box">
+                    <h3>Distribution Analysis</h3>
+                    <canvas id="distributionChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        let timeSeriesChart, correlationChart, distributionChart;
+        let selectedPollutants = ['PM2.5'];
+
+        // Load locations on page load
+        async function loadLocations() {
+            try {
+                const response = await fetch('/api/locations');
+                const data = await response.json();
+                const select = document.getElementById('locationSelect');
+                select.innerHTML = '';
+                
+                if (data.locations && data.locations.length > 0) {
+                    data.locations.forEach(loc => {
+                        const option = document.createElement('option');
+                        option.value = loc;
+                        option.textContent = loc;
+                        select.appendChild(option);
+                    });
+                } else {
+                    select.innerHTML = '<option>No locations available</option>';
+                }
+            } catch (error) {
+                console.error('Error loading locations:', error);
+                document.getElementById('locationSelect').innerHTML = '<option>Error loading</option>';
+            }
+        }
+
+        // Load pollutants and update pills
+        async function loadPollutants() {
+            try {
+                const response = await fetch('/api/pollutants');
+                const data = await response.json();
+                const container = document.getElementById('pollutantPills');
+                container.innerHTML = '';
+                
+                if (data.pollutants && data.pollutants.length > 0) {
+                    data.pollutants.forEach((pollutant, index) => {
+                        const pill = document.createElement('button');
+                        pill.className = index === 0 ? 'pill pill-active' : 'pill';
+                        pill.dataset.pollutant = pollutant;
+                        pill.textContent = pollutant;
+                        pill.addEventListener('click', function() {
+                            this.classList.toggle('pill-active');
+                            updateSelectedPollutants();
+                        });
+                        container.appendChild(pill);
+                    });
+                    updateSelectedPollutants();
+                }
+            } catch (error) {
+                console.error('Error loading pollutants:', error);
+            }
+        }
+
+        // Update selected pollutants array
+        function updateSelectedPollutants() {
+            selectedPollutants = Array.from(document.querySelectorAll('.pill.pill-active'))
+                .map(pill => pill.dataset.pollutant);
+        }
+
+        // Apply filters and fetch data
+        document.getElementById('applyFiltersBtn').addEventListener('click', async function() {
+            const location = document.getElementById('locationSelect').value;
+            const timeRange = document.getElementById('timeRangeSelect').value;
+
+            if (selectedPollutants.length === 0) {
+                alert('Please select at least one pollutant!');
+                return;
+            }
+
+            // Show loading
+            this.textContent = '⏳ Loading...';
+            this.disabled = true;
+
+            try {
+                const response = await fetch('/api/filter-data', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        location: location,
+                        time_range: timeRange,
+                        pollutants: selectedPollutants
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.error) {
+                    alert('Error: ' + result.error);
+                } else {
+                    updateVisualizations(result);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error loading data: ' + error.message);
+            } finally {
+                this.innerHTML = '<span class="icon">🔄</span> Apply Filters';
+                this.disabled = false;
+            }
+        });
+
+        // Update all visualizations
+        function updateVisualizations(data) {
+            console.log('Updating visualizations with data:', data);
+
+            // Update Time Series
+            if (data.data.time_series) {
+                updateTimeSeriesChart(data.data.time_series);
+            }
+
+            // Update Correlation
+            if (data.data.correlation) {
+                updateCorrelationChart(data.data.correlation);
+            }
+
+            // Update Distribution
+            if (data.data.distribution) {
+                updateDistributionChart(data.data.distribution);
+            }
+
+            // Update Statistics
+            if (data.data.statistics) {
+                updateStatistics(data.data.statistics);
+            }
+
+            // Update Data Quality
+            if (data.data.quality) {
+                updateDataQuality(data.data.quality);
+            }
+        }
+
+        // Update Time Series Chart
+        function updateTimeSeriesChart(tsData) {
+            const ctx = document.getElementById('timeSeriesChart').getContext('2d');
+            if (timeSeriesChart) timeSeriesChart.destroy();
+            
+            timeSeriesChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: tsData.dates,
+                    datasets: [{
+                        data: tsData.values,
+                        borderColor: '#66bb6a',
+                        backgroundColor: 'rgba(102, 187, 106, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { maxTicksLimit: 10 }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#f0f0f0' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update Correlation Chart (Bubble chart)
+        function updateCorrelationChart(corrData) {
+            const ctx = document.getElementById('correlationChart').getContext('2d');
+            if (correlationChart) correlationChart.destroy();
+            
+            // Create bubble positions
+            const pollutants = corrData.pollutants;
+            const bubbleData = [];
+            
+            pollutants.forEach((poll1, i) => {
+                pollutants.forEach((poll2, j) => {
+                    const bubble = corrData.bubbles.find(b => b.x === poll1 && b.y === poll2);
+                    if (bubble) {
+                        bubbleData.push({
+                            x: i * 20,
+                            y: j * 20,
+                            r: bubble.size || 15,
+                            correlation: bubble.value
+                        });
+                    }
+                });
+            });
+
+            correlationChart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        data: bubbleData,
+                        backgroundColor: function(context) {
+                            const corr = context.raw.correlation;
+                            if (corr >= 0.7) return 'rgba(76, 175, 80, 0.8)';
+                            if (corr >= 0.3) return 'rgba(76, 175, 80, 0.6)';
+                            if (corr >= -0.3) return 'rgba(158, 158, 158, 0.5)';
+                            return 'rgba(244, 67, 54, 0.6)';
+                        },
+                        pointRadius: function(context) {
+                            return context.raw.r || 15;
+                        }
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Correlation: ' + context.raw.correlation.toFixed(2);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { display: false },
+                        y: { display: false }
+                    }
+                }
+            });
+        }
+
+        // Update Distribution Chart
+        function updateDistributionChart(distData) {
+            const ctx = document.getElementById('distributionChart').getContext('2d');
+            if (distributionChart) distributionChart.destroy();
+            
+            distributionChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: distData.labels,
+                    datasets: [{
+                        data: distData.values,
+                        backgroundColor: '#66bb6a',
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#f0f0f0' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update Statistics
+        function updateStatistics(stats) {
+            document.getElementById('statMean').textContent = stats.mean.toFixed(1);
+            document.getElementById('statMedian').textContent = stats.median.toFixed(1);
+            document.getElementById('statStd').textContent = stats.std.toFixed(1);
+            document.getElementById('statMin').textContent = stats.min.toFixed(1);
+            document.getElementById('statMax').textContent = stats.max.toFixed(1);
+            document.getElementById('statCount').textContent = stats.count.toLocaleString();
+        }
+
+        // Update Data Quality
+        function updateDataQuality(quality) {
+            document.getElementById('completenessBar').style.width = quality.completeness + '%';
+            document.getElementById('completenessText').textContent = quality.completeness + '%';
+            document.getElementById('validityBar').style.width = quality.validity + '%';
+            document.getElementById('validityText').textContent = quality.validity + '%';
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadLocations();
+            await loadPollutants();
+            // Auto-load initial data
+            document.getElementById('applyFiltersBtn').click();
+        });
+    </script>
+</body>
+</html>

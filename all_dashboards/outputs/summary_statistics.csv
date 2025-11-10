@@ -1,0 +1,2 @@
+Total_Days_Analyzed,Current_AQI,Current_Category,Avg_AQI_30d,Max_AQI_30d,Min_AQI_30d,High_Risk_Days,Good_Days_Percent,Target_Pollutant,Best_Model,Forecast_Days
+15984,6,Good,261.8,300.0,6.0,8059,31.08108108108108,PM2.5,Prophet,7

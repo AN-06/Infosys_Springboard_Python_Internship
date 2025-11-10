@@ -1,0 +1,2 @@
+Timestamp,AQI,Category,Alert_Level,Icon,Title,Message,Recommendations,Sensitive_Groups
+2024-03-14 13:00:00,6,Good,info,✅,Good Air Quality,"Air quality is satisfactory, and air pollution poses little or no risk.",Great day for outdoor activities | Windows can be kept open for ventilation | No special precautions needed,No restrictions for any group

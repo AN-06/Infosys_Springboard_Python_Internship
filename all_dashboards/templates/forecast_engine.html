@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Air Quality Forecast Engine</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">🌍 Air Quality System</div>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/data-explorer">Data Explorer</a>
+                <a href="/forecast-engine" class="active">Forecast Engine</a>
+                <a href="{{ url_for('aqi_dashboard') }}">AQI Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="forecast-container">
+        <!-- Header -->
+        <div class="forecast-header">
+            <h1>Air Quality Forecast Engine</h1>
+            <p class="subtitle">Milestone 2: Working Application (Weeks 3-4)</p>
+        </div>
+
+        <!-- Content -->
+        <div class="forecast-content">
+            <!-- Model Performance Chart -->
+            <div class="forecast-chart-box">
+                <div class="forecast-chart-header">
+                    <h3>📊 Model Performance</h3>
+                    <div class="metric-toggle">
+                        <button class="metric-btn active" data-metric="RMSE">RMSE</button>
+                        <button class="metric-btn" data-metric="MAE">MAE</button>
+                    </div>
+                </div>
+                <canvas id="modelPerformanceChart" style="height: 350px;"></canvas>
+            </div>
+
+            <!-- PM2.5 Forecast Chart -->
+            <div class="forecast-chart-box">
+                <div class="forecast-chart-header">
+                    <h3>📈 PM2.5 Forecast</h3>
+                    <div class="forecast-controls">
+                        <div class="forecast-control-group">
+                            <label>Model:</label>
+                            <select id="modelSelect" class="forecast-select">
+                                <option value="LSTM">LSTM</option>
+                                <option value="ARIMA">ARIMA</option>
+                                <option value="Prophet">Prophet</option>
+                                <option value="XGBoost">XGBoost</option>
+                            </select>
+                        </div>
+                        <div class="forecast-control-group">
+                            <label>Horizon:</label>
+                            <select id="horizonSelect" class="forecast-select">
+                                <option value="24h">24h</option>
+                                <option value="48h">48h</option>
+                                <option value="7d">7d</option>
+                                <option value="30d">30d</option>
+                            </select>
+                        </div>
+                        <button id="generateForecastBtn" class="generate-btn">Generate Forecast</button>
+                    </div>
+                </div>
+                <canvas id="forecastChart" style="height: 350px;"></canvas>
+                <div id="maeDisplay" class="mae-display" style="display: none;">
+                    <strong>Forecast MAE:</strong> <span id="maeValue" class="mae-value">--</span> μg/m³
+                </div>
+            </div>
+
+            <!-- Two Column: Best Models Table and Forecast Accuracy -->
+            <div class="forecast-two-col">
+                <!-- Best Model by Pollutant -->
+                <div class="forecast-chart-box">
+                    <h3>🏆 Best Model by Pollutant</h3>
+                    <table class="best-models-table">
+                        <thead>
+                            <tr>
+                                <th>Pollutant</th>
+                                <th>Best Model</th>
+                                <th>RMSE</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bestModelsTableBody">
+                            <tr><td colspan="4" style="text-align: center;">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Forecast Accuracy -->
+                <div class="forecast-chart-box">
+                    <h3>📉 Forecast Accuracy</h3>
+                    <canvas id="accuracyChart" style="height: 300px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer
+    <footer>
+        <div class="container">
+            <p>Built with Flask & Chart.js | Data Science Project 2024</p>
+        </div>
+    </footer> -->
+
+<script>
+/* -------------------------
+   Utilities (defensive)
+   ------------------------- */
+function toNumericArray(arr) {
+    // Convert array-like to array of numbers; non-numeric -> null
+    if (!Array.isArray(arr)) return [];
+    return arr.map(v => {
+        if (v === null || typeof v === 'undefined') return null;
+        // allow numbers and numeric strings
+        const n = Number(v);
+        return Number.isFinite(n) ? n : null;
+    });
+}
+
+function padOrTrimArrays(n, arrays) {
+    // arrays: array of arrays -> modify in place to be length n, pad with nulls
+    arrays.forEach(a => {
+        while (a.length < n) a.push(null);
+        if (a.length > n) a.length = n;
+    });
+}
+
+function safeMax(arrays) {
+    // arrays: array of numeric arrays (may contain nulls); return max numeric value or 1
+    let vals = [];
+    arrays.forEach(a => {
+        a.forEach(v => { if (v !== null && !isNaN(v)) vals.push(v); });
+    });
+    if (vals.length === 0) return 1;
+    return Math.max(...vals);
+}
+
+/* -------------------------
+   Charts
+   ------------------------- */
+let modelPerformanceChart, forecastChart, accuracyChart;
+let currentMetric = 'RMSE';
+
+async function loadModelPerformance(){
+    try {
+        const res = await fetch('/api/model-performance');
+        const data = await res.json();
+        updateModelPerformanceChart(data);
+    } catch(e) { console.error('loadModelPerformance error', e); }
+}
+
+function updateModelPerformanceChart(data){
+    const ctx = document.getElementById('modelPerformanceChart').getContext('2d');
+    if (modelPerformanceChart) modelPerformanceChart.destroy();
+
+    modelPerformanceChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: data.pollutants,
+            datasets: [
+                { label:'ARIMA', data: data.ARIMA, borderWidth:0 },
+                { label:'Prophet', data: data.Prophet, borderWidth:0 },
+                { label:'LSTM', data: data.LSTM, borderWidth:0 },
+                { label:'XGBoost', data: data.XGBoost, borderWidth:0 }
+            ]
+        },
+        options: {
+            responsive:true, maintainAspectRatio:false,
+            plugins:{ legend:{ position:'top' } },
+            scales:{ x:{ grid:{display:false} }, y:{ beginAtZero:true, title:{display:true, text: currentMetric} } }
+        }
+    });
+}
+
+document.querySelectorAll('.metric-btn').forEach(btn=>{
+    btn.addEventListener('click', function(){
+        document.querySelectorAll('.metric-btn').forEach(b=>b.classList.remove('active'));
+        this.classList.add('active');
+        currentMetric = this.dataset.metric;
+        if (modelPerformanceChart) {
+            modelPerformanceChart.options.scales.y.title.text = currentMetric;
+            modelPerformanceChart.update();
+        }
+    });
+});
+
+/* -------------------------
+   Forecast generation
+   ------------------------- */
+document.getElementById('generateForecastBtn').addEventListener('click', async function(){
+    const btn = this;
+    btn.textContent = '⏳ Generating...';
+    btn.disabled = true;
+
+    try {
+        const model = document.getElementById('modelSelect').value;
+        const horizon = document.getElementById('horizonSelect').value;
+
+        const res = await fetch('/api/forecast', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({ model, horizon })
+        });
+
+        const data = await res.json();
+
+        if (data.error) {
+            console.error('API forecast error detail:', data.detail || data.error);
+            alert('Error generating forecast: ' + (data.detail || data.error));
+        } else {
+            updateForecastChart(data);
+            document.getElementById('maeDisplay').style.display = 'block';
+            document.getElementById('maeValue').textContent = (data.mae || 0).toFixed(2);
+        }
+    } catch (e) {
+        console.error('Error generating forecast:', e);
+        alert('Error generating forecast');
+    } finally {
+        btn.textContent = 'Generate Forecast';
+        btn.disabled = false;
+    }
+});
+
+/* Update forecast chart with defensive handling */
+function updateForecastChart(data){
+    const ctx = document.getElementById('forecastChart').getContext('2d');
+    if (forecastChart) forecastChart.destroy();
+
+    // defensive numeric conversion
+    const dates = Array.isArray(data.dates) ? data.dates.slice() : [];
+    const actual = toNumericArray(data.actual || []);
+    const forecast = toNumericArray(data.forecast || []);
+    const ci_upper = toNumericArray(data.ci_upper || []);
+    const ci_lower = toNumericArray(data.ci_lower || []);
+
+    // determine proper length n (max of arrays)
+    const n = Math.max(dates.length, actual.length, forecast.length, ci_upper.length, ci_lower.length, 1);
+
+    // pad/trim arrays to same length
+    while (dates.length < n) dates.push(`Point ${dates.length}`);
+    if (dates.length > n) dates.length = n;
+    padOrTrimArrays(n, [actual, forecast, ci_upper, ci_lower]);
+
+    // compute suggestedMax: 10% headroom above maximum numeric value
+    const maxVal = safeMax([actual, forecast, ci_upper, ci_lower]);
+    const suggestedMax = Math.ceil(Math.max(1, maxVal) * 1.1);
+
+    // Ensure CI ordering: CI lower must come first so CI upper can fill down to it.
+    const datasets = [
+        {
+            label: 'CI Lower',
+            data: ci_lower,
+            borderColor: 'rgba(0,0,0,0)',
+            backgroundColor: 'rgba(231,107,243,0.12)',
+            fill: false,
+            pointRadius: 0,
+            borderWidth: 0,
+            tension: 0.3
+        },
+        {
+            label: 'CI Upper',
+            data: ci_upper,
+            borderColor: 'rgba(0,0,0,0)',
+            backgroundColor: 'rgba(231,107,243,0.12)',
+            fill: '-1', // fill down to CI Lower
+            pointRadius: 0,
+            borderWidth: 0,
+            tension: 0.3
+        },
+        {
+            label: 'Actual',
+            data: actual,
+            borderColor: '#2196f3',
+            backgroundColor: 'transparent',
+            borderWidth: 3,
+            pointRadius: 0,
+            tension: 0.3
+        },
+        {
+            label: 'Forecast',
+            data: forecast,
+            borderColor: '#ff6b9d',
+            backgroundColor: 'transparent',
+            borderWidth: 2,
+            borderDash: [5,5],
+            pointRadius: 0,
+            tension: 0.3
+        }
+    ];
+
+    forecastChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: dates,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        filter: function(item) { return !item.text.includes('CI'); }
+                    }
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    callbacks: {
+                        label: function(context) {
+                            const val = context.parsed.y;
+                            if (val === null || typeof val === 'undefined' || isNaN(val)) return null;
+                            return context.dataset.label + ': ' + val.toFixed(2) + ' μg/m³';
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: { maxRotation: 45, minRotation: 45, maxTicksLimit: 15 }
+                },
+                y: {
+                    beginAtZero: true,
+                    suggestedMin: 0,
+                    suggestedMax: suggestedMax,
+                    grid: { color: '#f0f0f0' }
+                }
+            },
+            elements: {
+                line: { spanGaps: true }
+            }
+        }
+    });
+}
+
+/* -------------------------
+   Best models table & setting UI to actual best
+   ------------------------- */
+async function loadBestModels(){
+    try {
+        const res = await fetch('/api/best-models');
+        const data = await res.json();
+        const tbody = document.getElementById('bestModelsTableBody');
+        tbody.innerHTML = '';
+
+        // if array of models
+        if (Array.isArray(data) && data.length > 0) {
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${row.pollutant}</td><td><strong>${row.model}</strong></td><td>${row.rmse}</td><td class="status-active">${row.status}</td>`;
+                tbody.appendChild(tr);
+            });
+            setModelSelectToBest(data[0].model);
+        } else if (data && data.model) {
+            // single object
+            tbody.innerHTML = `<tr><td>PM2.5</td><td><strong>${data.model}</strong></td><td>${data.rmse || '--'}</td><td class="status-active">${data.status || 'Active'}</td></tr>`;
+            setModelSelectToBest(data.model);
+        } else {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">No best model info</td></tr>';
+        }
+    } catch (e) {
+        console.error('loadBestModels error', e);
+    }
+}
+
+function setModelSelectToBest(bestModel) {
+    if (!bestModel) return;
+    const sel = document.getElementById('modelSelect');
+    const b = String(bestModel).toLowerCase();
+    if (b.includes('lstm')) sel.value = 'LSTM (Best)';
+    else if (b.includes('arima')) sel.value = 'ARIMA';
+    else if (b.includes('prophet')) sel.value = 'Prophet';
+    else if (b.includes('xgboost') || b.includes('xgb')) sel.value = 'XGBoost';
+    else {
+        // fallback try exact match or leave as-is
+        const opt = Array.from(sel.options).find(o => o.value.toLowerCase() === b);
+        if (opt) sel.value = opt.value;
+    }
+}
+
+/* -------------------------
+   Forecast accuracy chart
+   ------------------------- */
+async function loadForecastAccuracy(){
+    try {
+        const res = await fetch('/api/forecast-accuracy');
+        const data = await res.json();
+        updateAccuracyChart(data);
+    } catch(e) { console.error('loadForecastAccuracy error', e); }
+}
+
+function updateAccuracyChart(data){
+    const ctx = document.getElementById('accuracyChart').getContext('2d');
+    if (accuracyChart) accuracyChart.destroy();
+    accuracyChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.horizons,
+            datasets: [
+                { label:'LSTM', data: data.LSTM, borderWidth:3, pointRadius:5, tension:0.4 },
+                { label:'ARIMA', data: data.ARIMA, borderWidth:3, pointRadius:5, tension:0.4 },
+                { label:'Prophet', data: data.Prophet, borderWidth:3, pointRadius:5, tension:0.4 },
+                { label:'XGBoost', data: data.XGBoost, borderWidth:3, pointRadius:5, tension:0.4 }
+            ]
+        },
+        options: {
+            responsive:true, maintainAspectRatio:false,
+            scales:{ y:{ min:50, max:100, title:{display:true, text:'Accuracy (%)'} } }
+        }
+    });
+}
+
+/* -------------------------
+   Init
+   ------------------------- */
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadModelPerformance();
+    await loadBestModels();
+    await loadForecastAccuracy();
+
+    // Auto-generate initial forecast
+    document.getElementById('generateForecastBtn').click();
+});
+</script>
+</body>
+</html>
